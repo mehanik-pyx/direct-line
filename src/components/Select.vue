@@ -29,14 +29,13 @@
       <div class="buttons">
         <button class="__btn" @click.prevent="selectAll">select all</button>
         <button class="__btn" @click.prevent="clear">clear</button>
-        <button class="__btn" @click.prevent="submit" type="submit">apply</button>
+        <button class="__btn" @click.prevent="submit">apply</button>
       </div>
       <div class="pagination">pagination:
         <input class="pagination-limit" type="text" v-model.number="limit">
-        <!--        TODO-->
         <div>
-          <button class="__btn">&lt;</button>
-          <button class="__btn">&gt;</button>
+          <button class="__btn" @click.prevent="prev">&lt;</button>
+          <button class="__btn" @click.prevent="next">&gt;</button>
         </div>
       </div>
     </div>
@@ -61,7 +60,8 @@ export default {
       showList: false,
       search: '',
       showComponent: false,
-      limit: 0
+      limit: 0,
+      offset: 0,
     }
   },
   watch: {
@@ -93,7 +93,7 @@ export default {
       axios
         .post(this.url, {
             limit: this.limit,
-            offset: 0
+            offset: this.offset
           },
           {
             headers: {"Content-Type": "multipart/form-data"}
@@ -105,7 +105,8 @@ export default {
             // TODO: refactor
             this.selected = [];
             this.preselected.forEach(id => {
-              this.addSelectedItem(this.items.find(item => item.id === id));
+              const item = this.items.find(item => item.id === id)
+              if (item) this.addSelectedItem(item);
             })
           }
         })
@@ -146,6 +147,14 @@ export default {
           [this.name]: payload
         }
       })
+    },
+    prev() {
+      this.offset -= this.limit
+      this.request()
+    },
+    next() {
+      this.offset += this.limit
+      this.request()
     }
   }
 }
